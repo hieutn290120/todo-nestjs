@@ -7,17 +7,21 @@ import {
   BadRequestException,
   Body,
   Get,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { BufferedFile } from '../minio-client/file.model';
 import { FileUploadService } from './file-upload.service';
+import { UploadFileDto } from 'src/dto/upload-file/upload-file.dto';
 import {
-  MoveFileDto,
-  UploadFileDto,
-} from 'src/dto/upload-file/upload-file.dto';
+  PresignedUrlQueryDto,
+  PresignedViewQueryDto,
+} from 'src/dto/upload-file/presigned-url.dto';
 
 @Controller('file-upload')
 export class FileUploadController {
+  private readonly expiry = 60 * 10;
+
   constructor(private fileUploadService: FileUploadService) {}
 
   @Post('single')
@@ -58,5 +62,30 @@ export class FileUploadController {
     @Body() data: UploadFileDto,
   ) {
     return this.fileUploadService.uploadMany(files, data.type);
+  }
+
+  @Get('presigned-upload')
+  async getPresignedUpload(@Query() query: PresignedUrlQueryDto) {
+    const { folderName, extFile } = query;
+
+    return {
+      url: await this.fileUploadService.getPresignedUploadUrl(
+        folderName,
+        extFile,
+        this.expiry,
+      ),
+    };
+  }
+
+  @Get('presigned-view')
+  async getPresignedView(@Query() query: PresignedViewQueryDto) {
+    const { folderName } = query;
+
+    return {
+      url: await this.fileUploadService.getPresignedViewUrl(
+        folderName,
+        this.expiry,
+      ),
+    };
   }
 }

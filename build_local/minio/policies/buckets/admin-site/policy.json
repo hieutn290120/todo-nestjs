@@ -6,16 +6,15 @@
       "Principal": {
         "AWS": ["*"]
       },
-      "Action": [
-        "s3:GetBucketLocation",
-        "s3:ListBucket"
-      ],
+      "Action": ["s3:GetBucketLocation", "s3:ListBucket"],
       "Resource": ["arn:aws:s3:::admin-site"]
     },
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": ["*"]
+        "AWS": [
+          "arn:aws:iam::123456789012:user/authorized-user-1"
+        ]
       },
       "Action": [
         "s3:GetObject",

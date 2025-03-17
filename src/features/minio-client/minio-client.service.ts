@@ -1,19 +1,28 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { MinioService } from 'nestjs-minio-client';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { BufferedFile } from './file.model';
 import * as crypto from 'crypto';
 import { config } from 'src/config/config';
-import { ImageType } from 'src/dto/upload-file/upload-file.dto';
 import { v4 as uuidv4 } from 'uuid';
+import * as Minio from 'minio';
+import { FolderName } from 'src/dto/upload-file';
 
 @Injectable()
 export class MinioClientService {
-  private readonly logger: Logger;
   private readonly baseBucket = 'admin-site';
   private readonly folderBase = 'system';
   private readonly folderTemp = 'temp-uploads';
+  private readonly expiry = 60 * 10;
+  private readonly minioClient: Minio.Client;
 
-  constructor(private readonly minioService: MinioService) {}
+  constructor() {
+    this.minioClient = new Minio.Client({
+      endPoint: 'localhost',
+      port: 9000,
+      useSSL: false,
+      accessKey: 'minio',
+      secretKey: 'minio123',
+    });
+  }
 
   async upload(
     file: BufferedFile,
@@ -34,14 +43,10 @@ export class MinioClientService {
     );
 
     const filename = uuidv4() + hashedFileName + ext;
-    const fileName: string = `${this.folderTemp}/${ImageType[folderBase]}/${filename}`;
+    const fileName: string = `${this.folderTemp}/${FolderName[folderBase]}/${filename}`;
     const fileBuffer = file.buffer;
     try {
-      await this.minioService.client.putObject(
-        baseBucket,
-        fileName,
-        fileBuffer,
-      );
+      await this.minioClient.putObject(baseBucket, fileName, fileBuffer);
     } catch (error) {
       console.log(error);
       throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
@@ -56,16 +61,16 @@ export class MinioClientService {
     const finalFilePath = tempPath.replace(`${this.folderTemp}/`, '');
 
     // Tạo một điều kiện sao chép (có thể để trống)
-    const copyConditions = this.minioService.copyConditions;
+    const copyConditions = new Minio.CopyConditions();
 
-    await this.minioService.client.copyObject(
+    await this.minioClient.copyObject(
       baseBucket,
       finalFilePath,
       tempPath,
       copyConditions,
     );
 
-    await this.minioService.client.removeObject(baseBucket, tempPath);
+    await this.minioClient.removeObject(baseBucket, tempPath);
     console.log(`Moved ${finalFilePath} to permanent storage`);
 
     return {
@@ -74,10 +79,28 @@ export class MinioClientService {
   }
 
   async delete(objectName: string, baseBucket: string = this.baseBucket) {
-    const res = await this.minioService.client.removeObject(
-      baseBucket,
+    await this.minioClient.removeObject(baseBucket, objectName);
+  }
+
+  async getPresignedViewUrl(objectName: string, expiry: number = this.expiry) {
+    return await this.minioClient.presignedGetObject(
+      this.baseBucket,
       objectName,
+      expiry,
     );
-    console.log(res);
+  }
+
+  async getPresignedUploadUrl(
+    folderName: string,
+    extFile: string,
+    expiry: number = this.expiry,
+  ) {
+    const fileName: string = `${FolderName[folderName]}/${uuidv4()}.${extFile}`;
+
+    return await this.minioClient.presignedPutObject(
+      this.baseBucket,
+      fileName,
+      expiry,
+    );
   }
 }

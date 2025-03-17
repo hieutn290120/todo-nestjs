@@ -1,17 +1,10 @@
 import { IsNotEmpty, IsEnum } from 'class-validator';
-
-export enum ImageType {
-  ticket = 'ticket',
-  coupon = 'coupon',
-  stamp = 'stamp',
-  system = 'system',
-  banner = 'banner',
-}
+import { FolderName } from './presigned-url.dto';
 
 export class UploadFileDto {
   @IsNotEmpty()
-  @IsEnum(ImageType, { message: 'Invalid image type' })
-  type: ImageType; // Nhóm ảnh: 'ticket', 'coupon'...
+  @IsEnum(FolderName, { message: 'Invalid image type' })
+  type: FolderName; // Nhóm ảnh: 'ticket', 'coupon'...
 }
 
 export class MoveFileDto {

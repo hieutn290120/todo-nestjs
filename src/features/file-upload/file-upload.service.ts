@@ -34,4 +34,23 @@ export class FileUploadService {
   async moveFile(tempPath: string) {
     await this.minioClientService.moveFile(tempPath);
   }
+
+  async getPresignedViewUrl(objectName: string, expiry: number) {
+    return await this.minioClientService.getPresignedViewUrl(
+      objectName,
+      expiry,
+    );
+  }
+
+  async getPresignedUploadUrl(
+    folderName: string,
+    contentType: string,
+    expiry: number,
+  ) {
+    return await this.minioClientService.getPresignedUploadUrl(
+      folderName,
+      contentType,
+      expiry,
+    );
+  }
 }
