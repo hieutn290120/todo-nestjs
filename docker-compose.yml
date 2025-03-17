@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:13 
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - nestjs-network
+  mailcatcher:
+    restart: on-failure
+    image: dockage/mailcatcher:0.9.0
+    ports:
+    - "1080:1080"
+    - "1025:1025"
+  fot-minio:
+    image: minio/minio:latest
+    container_name: fot-minio
+    ports:
+      - "9000:9000"  # API S3
+      - "9001:9001"  # Giao diện quản lý MinIO
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    volumes:
+      - minio_data:/data  # Dữ liệu MinIO
+      - ./build_local/minio/export:/export
+      - ./build_local/minio/policies:/policies
+    entrypoint: sh
+    command: -c "
+      mkdir -p /data/.minio.sys/buckets;
+      cp -r /policies/* /data/.minio.sys/;
+      cp -r /export/* /data/;
+      minio server /data --console-address ':9001';
+      "
+networks:
+  nestjs-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  minio_data:
+    driver: local
