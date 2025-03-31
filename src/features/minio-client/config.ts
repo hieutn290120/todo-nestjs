@@ -1,4 +1,4 @@
-export const config = {
+const config = {
   MINIO_ENDPOINT: 'localhost',
   MINIO_PORT: 9000,
   MINIO_ACCESSKEY: 'minio',
@@ -6,10 +6,18 @@ export const config = {
   MINIO_BUCKET: 'admin-site',
 };
 
-export const directory = {
+const directory = {
   ticket: 'ticket',
   coupon: 'coupon',
   stamp: 'stamp',
   banner: 'banner',
   system: 'system',
+  temp: 'temp',
 };
+
+export enum BucketName {
+  AdminSite = 'admin-site',
+  RemoteSite = 'remote-site',
+}
+
+export { config, directory };

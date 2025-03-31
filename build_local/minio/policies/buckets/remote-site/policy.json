@@ -7,7 +7,7 @@
         "AWS": ["*"]
       },
       "Action": ["s3:GetBucketLocation", "s3:ListBucket"],
-      "Resource": ["arn:aws:s3:::remote-app"]
+      "Resource": ["arn:aws:s3:::remote-site"]
     },
     {
       "Effect": "Allow",
@@ -22,7 +22,7 @@
         "s3:PutObjectRetention",
         "s3:PutLifecycleConfiguration"
       ],
-      "Resource": ["arn:aws:s3:::remote-app/*", "arn:aws:s3:::remote-app"]
+      "Resource": ["arn:aws:s3:::remote-site/*", "arn:aws:s3:::remote-site"]
     }
   ]
 }
