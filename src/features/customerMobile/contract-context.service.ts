@@ -2,13 +2,15 @@ import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ContractContextService {
-  private static contractId: number;
+  private contractId: number | string;
 
-  static setContractId(contractId: number) {
-    ContractContextService.contractId = contractId;
+  setContractId(contractId: number | string) {
+    console.log('setContractId', contractId);
+    this.contractId = contractId;
   }
 
-  static getContractId(): number {
-    return ContractContextService.contractId;
+  getContractId(): number | string {
+    console.log('getContractId', this.contractId);
+    return this.contractId;
   }
 } 

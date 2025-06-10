@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, BeforeInsert, BeforeUpdate, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { Contract } from './contract.entity';
-import { ContractContextService } from '../features/customerMobile/contract-context.service';
 
 @Entity('customer_mobile')
 export class CustomerMobile {

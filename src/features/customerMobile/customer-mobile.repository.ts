@@ -2,22 +2,34 @@ import { Injectable } from '@nestjs/common';
 import { Repository, SelectQueryBuilder, DataSource, FindManyOptions, FindOneOptions } from 'typeorm';
 import { CustomerMobile } from '../../entity/customer-mobile.entity';
 import { ContractContextService } from './contract-context.service';
+import { resolve } from 'path';
 
 @Injectable()
 export class CustomerMobileRepository extends Repository<CustomerMobile> {
   private skipContractFilter: boolean = false;
 
-  constructor(private dataSource: DataSource) {
+  constructor(
+    private dataSource: DataSource,
+    private readonly contractContextService: ContractContextService
+  ) {
     super(CustomerMobile, dataSource.createEntityManager());
   }
 
   private applyContractFilter(queryBuilder: SelectQueryBuilder<CustomerMobile>): void {
     if (this.skipContractFilter) return;
 
-    const contractId = ContractContextService.getContractId();
+    const contractId = this.contractContextService.getContractId();
     if (contractId) {
-      queryBuilder.innerJoin('customer_mobile.contract', 'contract');
-      queryBuilder.where(`contract.id = :contractId`, { contractId });
+      if (contractId == 1) {
+        new Promise((resolve, rej) => {
+          setTimeout(() => {
+            queryBuilder.innerJoin('customer_mobile.contract', 'contract');
+            queryBuilder.where(`contract.id = :contractId`, { contractId });
+            console.log('contractId time out', contractId);
+            resolve(1);
+          }, 3000)
+        })
+      }
     }
   }
 

@@ -12,10 +12,7 @@ import { ContractContextMiddleware } from './contract-context.middleware';
   providers: [
     CustomerMobileService,
     ContractContextService,
-    {
-      provide: CustomerMobileRepository,
-      useClass: CustomerMobileRepository,
-    }
+    CustomerMobileRepository,
   ],
   controllers: [CustomerMobileController],
   exports: [CustomerMobileService],
