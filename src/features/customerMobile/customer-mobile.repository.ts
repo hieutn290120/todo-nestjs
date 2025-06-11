@@ -29,6 +29,10 @@ export class CustomerMobileRepository extends Repository<CustomerMobile> {
             resolve(1);
           }, 3000)
         })
+      } else {
+        queryBuilder.innerJoin('customer_mobile.contract', 'contract');
+        queryBuilder.where(`contract.id = :contractId`, { contractId });
+        console.log('contractId time out', contractId);
       }
     }
   }
